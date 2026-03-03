@@ -1,16 +1,53 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
 }
 
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model users {
+  user_id  String @id @default(uuid()) @db.VarChar(36)
+  username String @db.VarChar(55)
+  email    String @unique @db.VarChar(255)
+  password String @db.VarChar(55)
+  country  String @db.VarChar(55)
+  role     String @default("USER") @db.VarChar(25)
+}
+
+model games {
+  game_id       String          @id @default(uuid()) @db.VarChar(36)
+  game_name     String          @db.VarChar(255)
+  description   String          @db.VarChar(255)
+  run_categories run_categories[]
+}
+
+model run_categories {
+  run_category_id   String  @id @default(uuid()) @db.VarChar(36)
+  game_id           String  @db.VarChar(36)
+  run_category_name String  @db.VarChar(255)
+  game              games   @relation(fields: [game_id], references: [game_id])
+  runs              runs[]
+}
+
+model runs {
+  run_id          String         @id @default(uuid()) @db.VarChar(36)
+  run_category_id String         @db.VarChar(36)
+  user_id         String         @db.VarChar(36)
+  vod_url         String         @db.VarChar(255)
+  run_duration    BigInt
+  submitted_at    DateTime
+  verified_at     DateTime?
+  status          String         @default("PENDING") @db.VarChar(25)
+  run_category    run_categories @relation(fields: [run_category_id], references: [run_category_id])
+  comments        comments[]
+}
+
+model comments {
+  comment_id String   @id @default(uuid()) @db.VarChar(36)
+  run_id     String   @db.VarChar(36)
+  user_id    String   @db.VarChar(36)
+  comment    String   @db.VarChar(255)
+  created_at DateTime
+  run        runs     @relation(fields: [run_id], references: [run_id])
 }
