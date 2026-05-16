@@ -1,0 +1,21 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model games {
+  game_id        String           @id @default(uuid()) @db.VarChar(36)
+  game_name      String           @db.VarChar(255)
+  description    String           @db.VarChar(255)
+  run_categories run_categories[]
+}
+
+model run_categories {
+  run_category_id   String @id @default(uuid()) @db.VarChar(36)
+  game_id           String @db.VarChar(36)
+  run_category_name String @db.VarChar(255)
+  game              games  @relation(fields: [game_id], references: [game_id])
+}
