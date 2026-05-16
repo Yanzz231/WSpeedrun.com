@@ -1,0 +1,63 @@
+services:
+  auth-service:
+    build:
+      context: ./auth-service
+    container_name: wspeedrun-auth-service
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      AUTH_SERVICE_PORT: 3000
+    ports:
+      - "3000:3000"
+
+  game-service:
+    build:
+      context: ./game-service
+    container_name: wspeedrun-game-service
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      GAME_SERVICE_PORT: 3001
+    ports:
+      - "3001:3001"
+
+  run-service:
+    build:
+      context: ./run-service
+    container_name: wspeedrun-run-service
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      RUN_SERVICE_PORT: 3002
+      AUTH_SERVICE_URL: http://auth-service:3000
+      GAME_SERVICE_URL: http://game-service:3001
+    ports:
+      - "3002:3002"
+    depends_on:
+      auth-service:
+        condition: service_started
+      game-service:
+        condition: service_started
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+    container_name: wspeedrun-api-gateway
+    restart: unless-stopped
+    environment:
+      API_GATEWAY_PORT: 3003
+      AUTH_SERVICE_URL: http://auth-service:3000
+      GAME_SERVICE_URL: http://game-service:3001
+      RUN_SERVICE_URL: http://run-service:3002
+    ports:
+      - "3003:3003"
+    depends_on:
+      auth-service:
+        condition: service_started
+      game-service:
+        condition: service_started
+      run-service:
+        condition: service_started
