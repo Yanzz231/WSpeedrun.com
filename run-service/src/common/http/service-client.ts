@@ -1,13 +1,18 @@
 import { BadGatewayException, NotFoundException } from '@nestjs/common';
+import axios from 'axios';
+import type { AxiosResponse } from 'axios';
 
 export async function fetchServiceJson<T>(
   url: string,
   notFoundMessage: string,
 ): Promise<T> {
-  let response: Response;
+  let response: AxiosResponse<T>;
 
   try {
-    response = await fetch(url);
+    response = await axios.get<T>(url, {
+      timeout: Number(process.env.SERVICE_REQUEST_TIMEOUT_MS ?? 10000),
+      validateStatus: () => true,
+    });
   } catch {
     throw new BadGatewayException(`Unable to reach service at ${url}`);
   }
@@ -16,11 +21,11 @@ export async function fetchServiceJson<T>(
     throw new NotFoundException(notFoundMessage);
   }
 
-  if (!response.ok) {
+  if (response.status < 200 || response.status >= 300) {
     throw new BadGatewayException(
       `Service request failed with status ${response.status}`,
     );
   }
 
-  return (await response.json()) as T;
+  return response.data;
 }
