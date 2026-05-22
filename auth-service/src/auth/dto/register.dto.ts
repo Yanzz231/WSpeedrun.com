@@ -13,16 +13,16 @@ export class RegisterDto {
   @IsString()
   @MinLength(4)
   @MaxLength(40)
-  username: string;
+  username!: string;
 
   @ApiProperty({ example: "john@example.com" })
   @IsEmail()
-  email: string;
+  email!: string;
 
   @ApiProperty({ example: "Indonesia" })
   @IsString()
   @IsNotEmpty()
-  country: string;
+  country!: string;
 
   @ApiProperty({ example: "Password1!" })
   @IsStrongPassword({
@@ -33,5 +33,5 @@ export class RegisterDto {
     minSymbols: 1,
   })
   @MaxLength(40)
-  password: string;
+  password!: string;
 }

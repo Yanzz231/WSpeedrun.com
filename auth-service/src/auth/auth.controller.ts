@@ -1,3 +1,4 @@
+// Module
 import { Body, Controller, Post } from "@nestjs/common";
 import {
   ApiBadRequestResponse,
@@ -8,7 +9,11 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
+
+// Service
 import { AuthService } from "./auth.service";
+
+// DTO
 import { LoginDto } from "./dto/login.dto";
 import { RegisterDto } from "./dto/register.dto";
 

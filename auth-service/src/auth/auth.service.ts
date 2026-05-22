@@ -1,3 +1,4 @@
+// Module
 import {
   BadRequestException,
   Injectable,
@@ -5,7 +6,11 @@ import {
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
+
+// Service
 import { PrismaService } from "../prisma/prisma.service";
+
+// DTO
 import { LoginDto } from "./dto/login.dto";
 import { RegisterDto } from "./dto/register.dto";
 
