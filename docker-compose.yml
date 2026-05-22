@@ -5,7 +5,7 @@ services:
     container_name: wspeedrun-auth-service
     restart: unless-stopped
     environment:
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: ${AUTH_DATABASE_URL:-${DATABASE_URL:-mysql://root:password@host.docker.internal:3306/wspeedrun_auth}}
       JWT_SECRET: ${JWT_SECRET}
       AUTH_SERVICE_PORT: 3000
     ports:
@@ -17,7 +17,7 @@ services:
     container_name: wspeedrun-game-service
     restart: unless-stopped
     environment:
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: ${GAME_DATABASE_URL:-${DATABASE_URL:-mysql://root:password@host.docker.internal:3306/wspeedrun_game}}
       JWT_SECRET: ${JWT_SECRET}
       GAME_SERVICE_PORT: 3001
     ports:
@@ -29,7 +29,7 @@ services:
     container_name: wspeedrun-run-service
     restart: unless-stopped
     environment:
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: ${RUN_DATABASE_URL:-${DATABASE_URL:-mysql://root:password@host.docker.internal:3306/wspeedrun_run}}
       JWT_SECRET: ${JWT_SECRET}
       RUN_SERVICE_PORT: 3002
       AUTH_SERVICE_URL: http://auth-service:3000
@@ -52,6 +52,7 @@ services:
       AUTH_SERVICE_URL: http://auth-service:3000
       GAME_SERVICE_URL: http://game-service:3001
       RUN_SERVICE_URL: http://run-service:3002
+      GATEWAY_TIMEOUT_MS: 15000
     ports:
       - "3003:3003"
     depends_on:

@@ -40,7 +40,7 @@ Prerequisite: Docker Desktop sudah running.
 docker compose up --build
 ```
 
-Docker Compose akan menjalankan service NestJS dan memakai `.env` di folder masing-masing service.
+Docker Compose akan menjalankan semua service NestJS dan membaca konfigurasi dari `.env` di root project.
 
 | Container | Host Port | Internal URL |
 |---|---:|---|
@@ -49,13 +49,18 @@ Docker Compose akan menjalankan service NestJS dan memakai `.env` di folder masi
 | Run Service | 3002 | `http://run-service:3002` |
 | API Gateway | 3003 | `http://api-gateway:3003` |
 
-Pastikan `DATABASE_URL` di `auth-service/.env`, `game-service/.env`, dan `run-service/.env` sudah mengarah ke database yang bisa diakses dari container. Jika memakai database lokal di host machine, gunakan `host.docker.internal`, bukan `localhost`.
+Setiap service memakai database URL sendiri. Untuk Docker, isi variable ini di `.env` root project. Jika memakai database lokal di host machine, gunakan `host.docker.internal`, bukan `localhost`.
 
 Contoh:
 
 ```env
-DATABASE_URL=mysql://root:password@host.docker.internal:3306/wspeedrun
+AUTH_DATABASE_URL=mysql://root:password@host.docker.internal:3306/wspeedrun_auth
+GAME_DATABASE_URL=mysql://root:password@host.docker.internal:3306/wspeedrun_game
+RUN_DATABASE_URL=mysql://root:password@host.docker.internal:3306/wspeedrun_run
+JWT_SECRET=your_secret_key
 ```
+
+Jika variable database per-service belum diisi, Docker Compose masih fallback ke `DATABASE_URL` lama agar setup existing tetap bisa jalan.
 
 `AUTH_SERVICE_URL`, `GAME_SERVICE_URL`, dan `RUN_SERVICE_URL` di Docker Compose akan dioverride ke nama container supaya antar-service bisa saling terhubung.
 
@@ -84,7 +89,7 @@ docker compose down
 
 ### 2. Import Database
 
-Open `http://localhost/phpmyadmin`, go to Import, select `database.sql` from the project root, then click Go.
+Open `http://localhost/phpmyadmin`, go to Import, select `database.sql` from the project root, then click Go. SQL ini membuat tiga database: `wspeedrun_auth`, `wspeedrun_game`, dan `wspeedrun_run`.
 
 ### 3. Configure Environment
 
@@ -93,7 +98,7 @@ Each service has its own `.env`. Use the `.env.example` files as reference, or c
 Auth Service:
 
 ```env
-DATABASE_URL=mysql://root:@localhost:3306/wspeedrun
+DATABASE_URL=mysql://root:@localhost:3306/wspeedrun_auth
 JWT_SECRET=your_secret_key
 AUTH_SERVICE_PORT=3000
 ```
@@ -101,7 +106,7 @@ AUTH_SERVICE_PORT=3000
 Game Service:
 
 ```env
-DATABASE_URL=mysql://root:@localhost:3306/wspeedrun
+DATABASE_URL=mysql://root:@localhost:3306/wspeedrun_game
 JWT_SECRET=your_secret_key
 GAME_SERVICE_PORT=3001
 ```
@@ -109,7 +114,7 @@ GAME_SERVICE_PORT=3001
 Run Service:
 
 ```env
-DATABASE_URL=mysql://root:@localhost:3306/wspeedrun
+DATABASE_URL=mysql://root:@localhost:3306/wspeedrun_run
 JWT_SECRET=your_secret_key
 RUN_SERVICE_PORT=3002
 AUTH_SERVICE_URL=http://localhost:3000

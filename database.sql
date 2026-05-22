@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS wspeedrun;
-USE wspeedrun;
+CREATE DATABASE IF NOT EXISTS wspeedrun_auth;
+USE wspeedrun_auth;
 
 CREATE TABLE IF NOT EXISTS users (
   user_id  VARCHAR(36)  NOT NULL,
@@ -11,6 +11,9 @@ CREATE TABLE IF NOT EXISTS users (
   PRIMARY KEY (user_id),
   UNIQUE KEY uq_users_email (email)
 );
+
+CREATE DATABASE IF NOT EXISTS wspeedrun_game;
+USE wspeedrun_game;
 
 CREATE TABLE IF NOT EXISTS games (
   game_id     VARCHAR(36)  NOT NULL,
@@ -27,6 +30,9 @@ CREATE TABLE IF NOT EXISTS run_categories (
   CONSTRAINT fk_run_categories_game FOREIGN KEY (game_id) REFERENCES games (game_id) ON DELETE CASCADE
 );
 
+CREATE DATABASE IF NOT EXISTS wspeedrun_run;
+USE wspeedrun_run;
+
 CREATE TABLE IF NOT EXISTS runs (
   run_id          VARCHAR(36)  NOT NULL,
   run_category_id VARCHAR(36)  NOT NULL,
@@ -36,8 +42,7 @@ CREATE TABLE IF NOT EXISTS runs (
   submitted_at    DATETIME     NOT NULL,
   verified_at     DATETIME     NULL,
   status          VARCHAR(25)  NOT NULL DEFAULT 'PENDING',
-  PRIMARY KEY (run_id),
-  CONSTRAINT fk_runs_run_category FOREIGN KEY (run_category_id) REFERENCES run_categories (run_category_id) ON DELETE CASCADE
+  PRIMARY KEY (run_id)
 );
 
 CREATE TABLE IF NOT EXISTS comments (
