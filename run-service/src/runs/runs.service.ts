@@ -1,3 +1,4 @@
+// Module
 import {
   BadRequestException,
   Injectable,
@@ -5,27 +6,19 @@ import {
 } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { fetchServiceJson } from '../common/http/service-client';
+
+// Service
 import { PrismaService } from '../prisma/prisma.service';
+
+// DTO
 import { CreateRunDto } from './dto/create-run.dto';
+import type {
+  ServiceCategoryDto,
+  ServiceUserDto,
+} from './dto/run-response.dto';
 
-type ServiceUser = {
-  user_id: string;
-  username: string;
-  email: string;
-  country: string;
-  role: string;
-};
-
-type ServiceCategory = {
-  run_category_id: string;
-  game_id: string;
-  run_category_name: string;
-  game?: {
-    game_id: string;
-    game_name: string;
-    description: string;
-  };
-};
+// Utils
+import { normalizeRunStatus, serializeRun } from './utils/run.utils';
 
 @Injectable()
 export class RunsService {
@@ -36,36 +29,12 @@ export class RunsService {
 
   constructor(private prisma: PrismaService) {}
 
-  formatDuration(sec: number) {
-    sec = Number(sec);
-    const h = Math.floor(sec / 3600);
-    const m = Math.floor((sec % 3600) / 60);
-    const s = sec % 60;
-    return `${h} Hour(s) ${m} Minute(s) ${s} Second(s)`;
-  }
-
-  private serializeRun(
-    run: any,
-    user?: ServiceUser,
-    runCategory?: ServiceCategory,
-  ) {
-    const runDuration = Number(run.run_duration);
-
-    return {
-      ...run,
-      run_duration: runDuration,
-      ...(user ? { user } : {}),
-      ...(runCategory ? { run_category: runCategory } : {}),
-      formatted_duration: this.formatDuration(runDuration),
-    };
-  }
-
   private getUser(userId: string) {
     const url = `${this.authServiceUrl}/users/${encodeURIComponent(
       userId,
     )}/profile`;
 
-    return fetchServiceJson<Omit<ServiceUser, 'user_id'>>(
+    return fetchServiceJson<Omit<ServiceUserDto, 'user_id'>>(
       url,
       'User not found',
     ).then((profile) => ({ user_id: userId, ...profile }));
@@ -76,14 +45,14 @@ export class RunsService {
       categoryId,
     )}`;
 
-    return fetchServiceJson<ServiceCategory>(url, 'Category not found');
+    return fetchServiceJson<ServiceCategoryDto>(url, 'Category not found');
   }
 
   private async getUsersById(userIds: string[]) {
     const uniqueUserIds = [...new Set(userIds)];
 
     if (!uniqueUserIds.length) {
-      return new Map<string, ServiceUser>();
+      return new Map<string, ServiceUserDto>();
     }
 
     const users = await Promise.all(
@@ -97,7 +66,7 @@ export class RunsService {
     const uniqueCategoryIds = [...new Set(categoryIds)];
 
     if (!uniqueCategoryIds.length) {
-      return new Map<string, ServiceCategory>();
+      return new Map<string, ServiceCategoryDto>();
     }
 
     const categories = await Promise.all(
@@ -137,7 +106,7 @@ export class RunsService {
     const usersById = await this.getUsersById(runs.map((run) => run.user_id));
 
     return runs.map((run) =>
-      this.serializeRun(run, usersById.get(run.user_id), category),
+      serializeRun(run, usersById.get(run.user_id), category),
     );
   }
 
@@ -163,7 +132,7 @@ export class RunsService {
       user: usersById.get(comment.user_id),
     }));
 
-    return this.serializeRun({ ...run, comments }, user, runCategory);
+    return serializeRun({ ...run, comments }, user, runCategory);
   }
 
   async getByUser(userId: string, authUser: any) {
@@ -185,7 +154,7 @@ export class RunsService {
     );
 
     return runs.map((run) =>
-      this.serializeRun(run, user, categoriesById.get(run.run_category_id)),
+      serializeRun(run, user, categoriesById.get(run.run_category_id)),
     );
   }
 
@@ -206,14 +175,15 @@ export class RunsService {
 
     return {
       message: 'Run submitted successfully',
-      run: this.serializeRun(createdRun),
+      run: serializeRun(createdRun),
     };
   }
 
+  // ADMIN
   async getByStatus(status: string) {
-    const normalizedStatus = status.toUpperCase();
+    const normalizedStatus = normalizeRunStatus(status);
 
-    if (!['PENDING', 'ACCEPTED', 'REJECTED'].includes(normalizedStatus)) {
+    if (!normalizedStatus) {
       throw new BadRequestException(
         'Status must be PENDING, ACCEPTED, or REJECTED',
       );
@@ -232,7 +202,7 @@ export class RunsService {
     ]);
 
     return runs.map((run) =>
-      this.serializeRun(
+      serializeRun(
         run,
         usersById.get(run.user_id),
         categoriesById.get(run.run_category_id),
@@ -267,7 +237,7 @@ export class RunsService {
 
     return {
       message: `Run ${status.toLowerCase()} successfully`,
-      run: this.serializeRun(updatedRun),
+      run: serializeRun(updatedRun),
     };
   }
 }
