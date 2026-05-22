@@ -25,6 +25,7 @@ export class GamesService {
     return game;
   }
 
+  // ADMIN
   async create(dto: CreateGameDto) {
     return this.prisma.games.create({
       data: {

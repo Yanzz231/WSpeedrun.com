@@ -4,9 +4,9 @@ import { IsNotEmpty } from 'class-validator';
 export class CreateGameDto {
   @ApiProperty({ example: 'Celeste' })
   @IsNotEmpty()
-  game_name: string;
+  game_name!: string;
 
   @ApiProperty({ example: 'A precision platformer speedrun title.' })
   @IsNotEmpty()
-  description: string;
+  description!: string;
 }

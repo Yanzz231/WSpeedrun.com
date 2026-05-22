@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
@@ -27,8 +27,8 @@ export class CategoriesService {
     return category;
   }
 
+  // ADMIN
   async create(dto: CreateCategoryDto) {
-    // VALIDATE game_id exists
     const game = await this.prisma.games.findUnique({
       where: { game_id: dto.game_id },
     });
