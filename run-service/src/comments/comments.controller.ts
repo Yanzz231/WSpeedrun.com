@@ -1,3 +1,4 @@
+// Module
 import {
   Body,
   Controller,
@@ -20,8 +21,14 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+
+// Middleware
+import { JwtAuthGuard } from '../common/auth/guards/jwt-auth.guard';
+
+// Service
 import { CommentsService } from './comments.service';
+
+// DTO
 import { CreateCommentDto } from './dto/create-comment.dto';
 
 @ApiTags('Comments')

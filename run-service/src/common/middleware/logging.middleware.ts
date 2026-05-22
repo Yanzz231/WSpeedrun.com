@@ -5,11 +5,14 @@ const SENSITIVE_KEYS = ['password', 'token', 'deviceToken', 'authorization'];
 
 function maskSensitive(obj: any): any {
   if (!obj || typeof obj !== 'object') return obj;
+
   return Object.fromEntries(
-    Object.entries(obj).map(([k, v]) =>
-      SENSITIVE_KEYS.some((s) => k.toLowerCase().includes(s))
-        ? [k, '***']
-        : [k, v],
+    Object.entries(obj).map(([key, value]) =>
+      SENSITIVE_KEYS.some((sensitiveKey) =>
+        key.toLowerCase().includes(sensitiveKey),
+      )
+        ? [key, '***']
+        : [key, value],
     ),
   );
 }

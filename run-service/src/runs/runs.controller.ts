@@ -1,3 +1,4 @@
+// Module
 import {
   Body,
   Controller,
@@ -18,17 +19,26 @@ import {
   ApiParam,
   ApiTags,
   ApiUnauthorizedResponse,
+  ApiForbiddenResponse,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { CreateRunDto } from './dto/create-run.dto';
+
+// Middleware
+import { Roles } from '../common/auth/decorators/roles.decorator';
+import { JwtAuthGuard } from '../common/auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/auth/guards/roles.guard';
+
+// Service
 import { RunsService } from './runs.service';
 
+// DTO
+import { CreateRunDto } from './dto/create-run.dto';
+
 @ApiTags('Runs')
-@Controller('runs')
+@Controller()
 export class RunsController {
   constructor(private readonly runsService: RunsService) {}
 
-  @Get(':id/category')
+  @Get('runs/:id/category')
   @ApiOperation({ summary: 'Get accepted runs by run category' })
   @ApiParam({ name: 'id', description: 'Run category ID' })
   @ApiOkResponse({
@@ -41,7 +51,7 @@ export class RunsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get(':id/user')
+  @Get('runs/:id/user')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get runs submitted by a user' })
   @ApiParam({ name: 'id', description: 'User ID' })
@@ -55,7 +65,7 @@ export class RunsController {
     return this.runsService.getByUser(id, req.user);
   }
 
-  @Get(':id')
+  @Get('runs/:id')
   @ApiOperation({ summary: 'Get run detail' })
   @ApiParam({ name: 'id', description: 'Run ID' })
   @ApiOkResponse({
@@ -68,7 +78,7 @@ export class RunsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post()
+  @Post('runs')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Submit a new run' })
   @ApiBody({ type: CreateRunDto })
@@ -77,5 +87,54 @@ export class RunsController {
   @ApiUnauthorizedResponse({ description: 'Missing or invalid JWT token.' })
   create(@Body() dto: CreateRunDto, @Req() req) {
     return this.runsService.create(dto, req.user);
+  }
+
+  // ADMIN
+  @Get('admin/runs/:status')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @ApiOperation({ summary: 'Get run entries filtered by status' })
+  @ApiParam({
+    name: 'status',
+    enum: ['PENDING', 'ACCEPTED', 'REJECTED'],
+    description: 'Run review status',
+  })
+  @ApiOkResponse({ description: 'Runs matching the requested status.' })
+  @ApiBadRequestResponse({
+    description: 'Status must be PENDING, ACCEPTED, or REJECTED.',
+  })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid JWT token.' })
+  @ApiForbiddenResponse({ description: 'Admin role is required.' })
+  getByStatus(@Param('status') status: string) {
+    return this.runsService.getByStatus(status);
+  }
+
+  @Post('admin/runs/:id/accept')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @ApiOperation({ summary: 'Accept a run entry' })
+  @ApiParam({ name: 'id', description: 'Run ID' })
+  @ApiOkResponse({ description: 'Run accepted successfully.' })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid JWT token.' })
+  @ApiForbiddenResponse({ description: 'Admin role is required.' })
+  @ApiNotFoundResponse({ description: 'Run not found.' })
+  accept(@Param('id') id: string) {
+    return this.runsService.accept(id);
+  }
+
+  @Post('admin/runs/:id/reject')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @ApiOperation({ summary: 'Reject a run entry' })
+  @ApiParam({ name: 'id', description: 'Run ID' })
+  @ApiOkResponse({ description: 'Run rejected successfully.' })
+  @ApiUnauthorizedResponse({ description: 'Missing or invalid JWT token.' })
+  @ApiForbiddenResponse({ description: 'Admin role is required.' })
+  @ApiNotFoundResponse({ description: 'Run not found.' })
+  reject(@Param('id') id: string) {
+    return this.runsService.reject(id);
   }
 }

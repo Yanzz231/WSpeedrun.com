@@ -5,8 +5,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
-import { fetchServiceJson } from '../../common/http/service-client';
-import { PrismaService } from '../../prisma/prisma.service';
+import { fetchServiceJson } from '../common/http/service-client';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 
 @Injectable()
