@@ -1,3 +1,4 @@
+// Module
 import { Controller, Delete, Get, Post, Req, Res } from "@nestjs/common";
 import {
   ApiBearerAuth,
@@ -8,6 +9,8 @@ import {
   ApiTags,
 } from "@nestjs/swagger";
 import type { Request, Response } from "express";
+
+// Service
 import { ProxyService } from "./proxy.service";
 
 @ApiTags("Run Gateway")

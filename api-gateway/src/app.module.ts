@@ -1,6 +1,11 @@
+// Module
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
+
+// Middleware
 import { LoggingMiddleware } from "./common/middleware/logging.middleware";
 import { HealthController } from "./health/health.controller";
+
+// Feature
 import { ProxyModule } from "./proxy/proxy.module";
 
 @Module({
