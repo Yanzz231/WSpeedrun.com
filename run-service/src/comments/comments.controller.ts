@@ -23,7 +23,7 @@ import {
 } from '@nestjs/swagger';
 
 // Middleware
-import { JwtAuthGuard } from '../common/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
 // Service
 import { CommentsService } from './comments.service';

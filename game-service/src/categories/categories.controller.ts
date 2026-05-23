@@ -24,9 +24,9 @@ import {
 } from '@nestjs/swagger';
 
 // Middleware
-import { Roles } from '../common/auth/decorators/roles.decorator';
-import { JwtAuthGuard } from '../common/auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../common/auth/guards/roles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
 
 // Service
 import { CategoriesService } from './categories.service';
