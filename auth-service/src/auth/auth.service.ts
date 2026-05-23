@@ -14,6 +14,11 @@ import { PrismaService } from "../prisma/prisma.service";
 import { LoginDto } from "./dto/login.dto";
 import { RegisterDto } from "./dto/register.dto";
 
+type JwtPayload = {
+  sub: string;
+  role: string;
+};
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -58,7 +63,7 @@ export class AuthService {
       throw new UnauthorizedException("Invalid credentials");
     }
 
-    const payload = { user_id: user.user_id, role: user.role };
+    const payload: JwtPayload = { sub: user.user_id, role: user.role };
     const access_token = this.jwtService.sign(payload);
 
     return { access_token };

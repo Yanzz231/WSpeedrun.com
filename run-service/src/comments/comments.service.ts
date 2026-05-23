@@ -9,6 +9,11 @@ import { fetchServiceJson } from '../common/http/service-client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 
+type AuthUser = {
+  userId: string;
+  role: string;
+};
+
 @Injectable()
 export class CommentsService {
   private readonly authServiceUrl =
@@ -23,8 +28,8 @@ export class CommentsService {
     );
   }
 
-  async create(dto: CreateCommentDto, user: any) {
-    if (dto.user_id !== user.user_id) {
+  async create(dto: CreateCommentDto, user: AuthUser) {
+    if (dto.user_id !== user.userId) {
       throw new BadRequestException('User ID must match authenticated user');
     }
 
@@ -47,14 +52,14 @@ export class CommentsService {
     });
   }
 
-  async delete(id: string, user: any) {
+  async delete(id: string, user: AuthUser) {
     const comment = await this.prisma.comments.findUnique({
       where: { comment_id: id },
     });
 
     if (!comment) throw new NotFoundException('Comment not found');
 
-    if (comment.user_id !== user.user_id) {
+    if (comment.user_id !== user.userId) {
       throw new ForbiddenException('Not your comment');
     }
 

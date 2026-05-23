@@ -20,6 +20,11 @@ import type {
 // Utils
 import { normalizeRunStatus, serializeRun } from './utils/run.utils';
 
+type AuthUser = {
+  userId: string;
+  role: string;
+};
+
 @Injectable()
 export class RunsService {
   private readonly authServiceUrl =
@@ -135,8 +140,8 @@ export class RunsService {
     return serializeRun({ ...run, comments }, user, runCategory);
   }
 
-  async getByUser(userId: string, authUser: any) {
-    const isSelf = userId === authUser.user_id;
+  async getByUser(userId: string, authUser: AuthUser) {
+    const isSelf = userId === authUser.userId;
     const user = await this.getUser(userId);
 
     const runs = await this.prisma.runs.findMany({
@@ -158,13 +163,13 @@ export class RunsService {
     );
   }
 
-  async create(dto: CreateRunDto, user: any) {
+  async create(dto: CreateRunDto, user: AuthUser) {
     await this.ensureCategoryExists(dto.run_category_id);
 
     const createdRun = await this.prisma.runs.create({
       data: {
         run_id: uuidv4(),
-        user_id: user.user_id,
+        user_id: user.userId,
         run_category_id: dto.run_category_id,
         vod_url: dto.vod_url,
         run_duration: BigInt(dto.run_duration),

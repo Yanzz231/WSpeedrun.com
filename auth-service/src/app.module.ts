@@ -1,5 +1,6 @@
 // Module
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
 
 // Middleware
 import { AuthModule } from "./auth/auth.module";
@@ -10,7 +11,12 @@ import { PrismaModule } from "./prisma/prisma.module";
 import { UsersModule } from "./users/users.module";
 
 @Module({
-  imports: [PrismaModule, AuthModule, UsersModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    PrismaModule,
+    AuthModule,
+    UsersModule,
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
