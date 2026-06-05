@@ -1,8 +1,9 @@
+# syntax=docker/dockerfile:1.7
 FROM node:22.16.0-bookworm-slim AS deps
 
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN --mount=type=cache,id=npm-cache,target=/root/.npm,sharing=locked npm ci --prefer-offline --no-audit --no-fund
 
 FROM node:22.16.0-bookworm-slim AS builder
 
